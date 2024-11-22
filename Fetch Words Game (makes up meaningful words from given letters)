@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Words Game.</title>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    header{
+        background-color: #333;
+        width: 100%;
+        height: 20vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: wheat;
+    }
+
+    header h2{
+        width: 100%;
+        height: 30%;
+        font-size: 24px;
+        font-weight: bolder;
+        text-transform: capitalize;
+        text-align: center;
+        padding: 2%;
+    }
+
+    header form{
+        height: 60%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1%;
+    }
+
+    form input, form button{
+        padding: 1rem;
+        border: none;
+        border-radius: 5px;
+    }
+
+    form input[type="text"]{
+        width: 40%;
+        text-transform: uppercase;
+        font-size: 15px;
+        font-weight: bold;
+        letter-spacing: 10px;
+    }
+
+    form input[type="text"]::placeholder{
+        text-transform: capitalize;
+        font-size: 15px;
+        font-weight: 300;
+        letter-spacing: 3px;
+    }
+
+    form input[type="number"]{
+        width: 5%;
+        font-size: 15px;
+        font-weight: bold;
+    }
+
+    form button{
+        cursor: pointer;
+        text-transform: uppercase;
+        font-weight: bolder;
+        transition: .7s ease;
+    }
+
+    form button:hover{
+        background-color: #7e7b7b;
+        color: white;
+    }
+
+    .words_and_meaning{
+        width: 100%;
+        height: 100vh;
+        padding: 2%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        /* flex-direction: column; */
+    }
+
+    .words{
+        width: 15%;
+        height: 100%;
+        background-color: rgba(128, 128, 128, 0.719);
+        color: white;
+        padding: 4%;
+        overflow: scroll;
+        li{
+            margin: 1rem;
+        }
+        /* display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1%;
+        flex-wrap: wrap; */
+    }
+
+    .meanings{
+        width: 80%;
+        height: 100%;
+        background-color: rgba(128, 128, 128, 0.719);
+        color: white;
+        padding: 4%;
+        overflow: scroll;
+        li{
+            margin: 1rem;
+        }
+    }
+
+    footer{
+        height: 10vh;
+        width: 100%;
+    }
+</style>
+<body>
+    <header>
+        <h2>fetch words!</h2>
+        <form id="words_to_fetch">
+            <input type="text" name="wordInputs" placeholder="input letters here to fetch meaningful words">
+            <input type="number" name="inputNumber">
+            <button type="submit">Submit</button>
+        </form>
+    </header>
+    <section class="words_and_meaning">
+        <ol class="words"></ol>
+        <ol class="meanings"></ol>
+    </section>
+    <footer>
+        <p>Copyright@ KingDeDev2024</p>
+    </footer>
+
+    <script>
+        // Permutations
+
+const words = document.querySelector('.words');
+const meanings = document.querySelector('.meanings');
+// console.log(words, meanings);
+const form = document.querySelector('form')
+
+
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  // clear all previous result 
+  words.innerHTML = "";
+  meanings.innerHTML = "";
+
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData.entries());
+
+  const wordInputs = [...data.wordInputs.toUpperCase()];
+  const inputNumber = parseInt(data.inputNumber);
+  // console.log(wordInputs,inputNumber);
+
+  displayResult(wordInputs, inputNumber)
+
+});
+
+
+
+// CHECKING IF THE WORDS HAS MEANING.
+const dictionaryApi = "https://api.dictionaryapi.dev/api/v2/entries/en/";
+
+async function hasMeaning(word) {
+  try {
+    const response = await fetch(dictionaryApi + word);
+    const data = await response.json();
+    const meaning = data[0].meanings[0].definitions[0].definition;
+    const meaningfulWord = data[0].word;
+    return {
+      word: meaningfulWord.toUpperCase(),
+      meaning: data.length > 0 ? meaning  : 'Word has no meaning' ,
+      TorF: data.length > 0
+    };
+  } catch (error) {
+    console.error(`Error checking word meaning: ${error}`);
+    return false;
+  }
+}
+
+
+
+// NOT ALLOWING REAPETATION.
+async function generatePermutations(arr, len) {
+  // console.log(len);
+  if (len === 1) {
+    return arr.map((item) => [item]);
+  }
+
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    const current = arr[i];
+    const rest = arr.slice(0, i).concat(arr.slice(i + 1));
+    const permutations = await generatePermutations(rest, len - 1);
+
+    for (const permutation of permutations) {
+      const word = [current, ...permutation].join("");
+      result.push(word)
+    }
+  }
+
+  return result;
+}
+
+async function displayResult(letters, length) {
+  const games = ["V", "O", "L", "E", "D"]
+  const permutations = await generatePermutations(letters,length);
+  permutations.forEach((permutation) => {
+    console.log(permutation)
+      hasMeaning(permutation).then((res =>{
+        const checks = res.TorF;
+          if (checks === true) {
+            const wordList = document.createElement('li');
+            words.append(wordList);
+            wordList.innerHTML = res.word;
+            const mean = document.createElement('li');
+            meanings.append(mean);
+            mean.innerHTML = res.meaning
+          }
+      }))
+  });
+}
+    </script>
+</body>
+</html>
