@@ -14,7 +14,7 @@ Projects
 Connect with Me
 - LinkedIn: [https://www.linkedin.com/in/kingsley-ugwuosi]
 - upwork: [https://www.upwork.com/freelancers/-0139cb4ddbc94bca68]
-- whatsApp: [httpss://wa.link/v65fzk]
+- whatsApp: [https://wa.link/v65fzk]
 - Email: [kingsleyugwuosi37@gmail.com]
 
 Let's Collaborate
